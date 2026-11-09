@@ -153,25 +153,3 @@ silentreport/
   demo_fingerprints/     gambar sidik jari demo
   data/                  database dan file terenkripsi (dibuat otomatis)
 ```
-
-## 8. Keterbatasan (tulis jujur di laporan)
-
-- **Wajah tanpa deteksi keaslian (liveness):** foto atau layar HP berisi wajah yang diperlihatkan ke kamera dapat lolos. Karena itu wajah dipakai
-  **bersama** password, sidik jari, dan dongle, bukan sebagai satu-satunya faktor. Peningkatan: tantangan acak (kedip/tengok), kamera inframerah, atau model anti-spoofing.
-- **Wajah memakai metode klasik (LBPH)**, bukan jaringan saraf: lebih sensitif pada cahaya dan pose, dan kurang akurat dibanding model deep learning (mis. SFace/ArcFace).
-  Ambang bawaan belum dikalibrasi dengan banyak orang nyata (lihat bagian 5c).
-- **Kamera butuh konteks aman:** berfungsi di `127.0.0.1` dan HTTPS. Mengakses dari komputer lain lewat `http://IP` biasa akan diblokir browser.
-
-- **Biometrik:** tanpa sensor fisik, sidik jari berupa **file gambar**. Gambar demo bersifat sintetis. Untuk sensor asli, ganti sumber gambar dengan SDK sensor atau WebAuthn. Ambang kecocokan (60) diukur pada data sintetis: jari sama minimum ~100, jari berbeda maksimum ~35. Pada sidik jari nyata ambang perlu dikalibrasi ulang.
-- **Dongle:** berbasis file kunci. Jika file disalin ke flashdisk lain, tetap dianggap valid. Peningkatan: ikat ke serial hardware USB.
-- **Steganografi LSB** sekuensial. Rentan jika gambar dikompres ulang (JPEG) atau dianalisis steganalisis. Peningkatan: urutan piksel acak berbasis kunci.
-- **Blockchain** berjalan pada satu node (tanpa jaringan peer-to-peer). Fungsinya sebagai rantai bukti yang tahan-ubah, bukan konsensus terdistribusi. Penyerang dengan akses penuh ke database bisa menghitung ulang seluruh rantai. Peningkatan: jangkar hash terakhir ke pihak ketiga.
-- **Vigenere** hanya lapisan klasik sesuai syarat tugas. Keamanan sebenarnya datang dari AES-256-GCM.
-- Server untuk demo/lokal (`127.0.0.1`, tanpa HTTPS). Untuk produksi: HTTPS, WSGI server, rotasi kunci.
-- Metadata (ukuran pesan, waktu, nama samaran) tidak disembunyikan.
-
-## 9. Saran pembagian kerja (kelompok 1-3 orang)
-
-- Orang 1: dongle, biometrik, login (kriteria 1-2) dan UI.
-- Orang 2: super enkripsi teks, enkripsi file, enkripsi DB (kriteria 3-5).
-- Orang 3: steganografi, blockchain, pengujian dan laporan (kriteria 6-7).
