@@ -1,0 +1,6 @@
+flask
+cryptography
+pillow
+numpy
+opencv-python-headless
+scikit-image

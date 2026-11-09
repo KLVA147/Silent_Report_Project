@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Inspeksi kripto{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Inspeksi kriptografi</h1><p class="mut">Halaman bahan presentasi: bandingkan isi mentah database dengan hasil dekripsi.</p></div>
+</div>
+
+<div class="card">
+  <h3>Demo super enkripsi teks</h3>
+  <form method="post" class="row" style="align-items:flex-start" data-validate>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="field" data-required style="flex:1;min-width:240px;margin:0">
+      <label for="plain" class="sr-only">Teks</label>
+      <input type="text" id="plain" name="plain" required maxlength="500" placeholder="Ketik teks apa saja, lalu tekan Enkripsi">
+      <div class="err-msg">Teks wajib diisi.</div>
+    </div>
+    <button type="submit" class="btn">Enkripsi</button>
+  </form>
+  {% if demo %}
+  <div class="table-wrap" style="margin-top:14px"><table class="kv">
+    <tr><th>Plaintext</th><td>{{ demo['plaintext'] }}</td></tr>
+    <tr><th>1. Vigenere (klasik), hex</th><td><code>{{ demo['after_vigenere_hex'] }}</code></td></tr>
+    <tr><th>2. AES-256-GCM (modern), base64</th><td><code>{{ demo['after_aes_gcm_b64'] }}</code></td></tr>
+  </table></div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h3>Isi mentah tabel users</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Pengguna</th><th>Peran</th><th>Hash password (scrypt)</th><th>Template sidik jari (terenkripsi)</th></tr>
+    {% for u in users %}<tr><td>{{ u['username'] }}</td><td>{{ u['role'] }}</td>
+      <td><code>{{ u['pw_hash'][:70] }}...</code></td><td><code>{{ u['bio_template'][:50] }}...</code></td></tr>{% endfor %}
+  </table></div>
+</div>
+
+<div class="card">
+  <h3>Isi mentah tabel messages (10 terakhir)</h3>
+  <div class="table-wrap"><table>
+    <tr><th>ID</th><th>Laporan</th><th>Penting</th><th>Ciphertext</th></tr>
+    {% for m in msgs %}<tr><td>{{ m['id'] }}</td><td>#{{ m['report_id'] }}</td>
+      <td>{% if m['important'] %}<span class="tag warn">Lapisan DB</span>{% else %}<span class="tag">Tidak</span>{% endif %}</td>
+      <td><code>{{ m['body'][:90] }}...</code></td></tr>{% endfor %}
+  </table></div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}SilentReport{% endblock %} | SilentReport</title>
+<meta name="description" content="Aplikasi pelaporan anonim berbasis kriptografi">
+<script>
+  /* Terapkan tema sebelum render agar tidak berkedip */
+  (function () { try { var t = localStorage.getItem("sr-theme");
+    if (!t && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) t = "dark";
+    if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {} })();
+</script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d4ed8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z'/%3E%3Cpath d='M9 12l2 2 4-4'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="logo" href="{{ url_for('index') }}">{{ icon('shield-check', 26) }}<span>Silent<b>Report</b></span></a>
+    {% if user %}
+    <nav class="nav" id="nav" aria-label="Navigasi utama">
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint in ('dashboard','view_report') }}">Laporan</a>
+      {% if user['role']=='reporter' %}<a href="{{ url_for('new_report') }}" class="{{ 'active' if request.endpoint=='new_report' }}">Buat laporan</a>{% endif %}
+      <a href="{{ url_for('chain') }}" class="{{ 'active' if request.endpoint=='chain' }}">Rantai bukti</a>
+      {% if user['role']=='officer' %}<a href="{{ url_for('inspect') }}" class="{{ 'active' if request.endpoint=='inspect' }}">Inspeksi kripto</a>{% endif %}
+    </nav>
+    {% else %}<div class="nav"></div>{% endif %}
+    <div class="nav-right">
+      <button type="button" class="icon-btn" id="theme-toggle" title="Ganti tema terang/gelap" aria-label="Ganti tema terang atau gelap">{{ icon('contrast', 18) }}</button>
+      {% if user %}
+      <div class="who"><span class="avatar">{{ user['username'][0] }}</span>
+        <div class="nm"><b>{{ user['username'] }}</b><br><span class="mut">{{ 'Pelapor' if user['role']=='reporter' else 'Petugas' }}</span></div></div>
+      <form method="post" action="{{ url_for('logout') }}" data-confirm="Keluar dari SilentReport?">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">Keluar</button>
+      </form>
+      <button type="button" class="icon-btn menu-btn" id="menu-btn" aria-label="Buka menu" aria-expanded="false" aria-controls="nav">{{ icon('menu', 18) }}</button>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, m in msgs %}
+    <div class="alert {{ cat }}" role="alert">
+      {{ icon('check' if cat=='ok' else 'alert', 18) }}<div>{{ m }}</div>
+      <button type="button" class="x" aria-label="Tutup pesan">&times;</button>
+    </div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">SilentReport &middot; Tugas Akhir Kriptografi &middot; Data dienkripsi dan hanya bisa dibuka dengan dongle
+  {% if config.ALLOW_QUIT %}
+  <form method="post" action="{{ url_for('quit_app') }}" data-confirm="Tutup SilentReport sepenuhnya?" style="display:inline">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    &middot; <button type="submit" class="linkbtn">Tutup aplikasi</button>
+  </form>
+  {% endif %}
+</footer>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="lightbox" id="lightbox"><img alt="Pratinjau gambar"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

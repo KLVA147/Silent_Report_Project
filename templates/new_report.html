@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Buat laporan{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Buat laporan</h1><p class="mut">Isi laporan dienkripsi sebelum disimpan. Lampiran dapat berupa file atau foto bukti.</p></div>
+</div>
+<form method="post" enctype="multipart/form-data" data-validate>
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <div class="card">
+    <h3>1. Isi laporan</h3>
+    <div class="grid">
+      <div class="field" data-required>
+        <label for="title">Judul</label>
+        <input type="text" id="title" name="title" required maxlength="150" placeholder="Ringkasan singkat kejadian">
+        <div class="err-msg">Judul wajib diisi.</div>
+      </div>
+      <div class="field">
+        <label for="category">Kategori</label>
+        <select name="category" id="category">{% for c in CATEGORIES %}<option>{{ c }}</option>{% endfor %}</select>
+      </div>
+    </div>
+    <div class="field" data-required>
+      <label for="message">Uraian kejadian</label>
+      <textarea id="message" name="message" required maxlength="5000" data-max="5000" data-submit-hotkey placeholder="Siapa, apa, kapan, di mana, dan bagaimana kejadiannya."></textarea>
+      <div class="counter"></div>
+      <div class="hint">Dienkripsi berlapis: Vigenere lalu AES-256-GCM.</div>
+      <div class="err-msg">Uraian kejadian wajib diisi.</div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="important" value="1">
+      <div><b>Tandai sebagai pesan penting</b><span>Ditambah satu lapisan enkripsi lagi pada tingkat database.</span></div>
+    </label>
+  </div>
+
+  <div class="card">
+    <h3>2. Barang bukti (opsional)</h3>
+    <div class="grid">
+      <div class="field">
+        <span class="lbl">File bukti</span>
+        <div class="dz" data-max-mb="16">
+          <input type="file" name="evidence_file" aria-label="Unggah file bukti">
+          <div class="dz-empty"><div class="dz-title">Pilih atau seret file</div><div class="dz-sub">Dienkripsi ChaCha20-Poly1305. Maks. 16 MB</div></div>
+          <div class="dz-file"><div class="meta"><div class="name"></div><div class="size mut small"></div></div><button type="button" class="dz-clear">Hapus</button></div>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl">Foto bukti</span>
+        <div class="dz" data-max-mb="8">
+          <input type="file" name="evidence_image" accept="image/*" aria-label="Unggah foto bukti">
+          <div class="dz-empty"><div class="dz-title">Pilih atau seret foto</div><div class="dz-sub">Catatan disembunyikan di dalam piksel (steganografi LSB)</div></div>
+          <div class="dz-file"><img alt="Pratinjau foto"><div class="meta"><div class="name"></div><div class="size mut small"></div></div><button type="button" class="dz-clear">Hapus</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="secret_note">Catatan rahasia di dalam foto</label>
+      <input type="text" id="secret_note" name="secret_note" maxlength="500" placeholder="Contoh: lokasi dan waktu foto diambil">
+      <div class="hint">Hanya dipakai bila Anda mengunggah foto bukti.</div>
+    </div>
+  </div>
+  <div class="row spread">
+    <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Batal</a>
+    <button type="submit" class="btn" data-loading="Mengenkripsi dan mengirim...">Kirim laporan</button>
+  </div>
+</form>
+{% endblock %}

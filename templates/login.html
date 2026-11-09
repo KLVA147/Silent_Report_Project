@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Masuk{% endblock %}
+{% block content %}
+<div class="auth">
+  <div class="auth-head">
+    <div class="badge-lg">{{ icon('fingerprint', 30) }}</div>
+    <h1>Masuk ke SilentReport</h1>
+    <p class="mut">Verifikasi tiga faktor: password, sidik jari, dan wajah. Dongle sudah terdeteksi.</p>
+  </div>
+  <div class="card">
+    <form method="post" enctype="multipart/form-data" data-validate>
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <div class="field" data-required>
+        <label for="username">Nama samaran</label>
+        <input type="text" id="username" name="username" required autocomplete="username" autofocus value="{{ request.form.get('username', '') }}">
+        <div class="err-msg">Nama samaran wajib diisi.</div>
+      </div>
+      <div class="field" data-required>
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+          <button type="button" class="toggle" data-toggle-password="password" aria-pressed="false">Tampilkan</button>
+        </div>
+        <div class="err-msg">Password wajib diisi.</div>
+      </div>
+      <div class="field">
+        <span class="lbl">Pindai sidik jari</span>
+        <div class="dz" data-required data-max-mb="5">
+          <input type="file" name="fingerprint" accept="image/*" required aria-label="Unggah gambar sidik jari">
+          <div class="dz-empty">
+            <div class="dz-title">Seret gambar sidik jari ke sini atau klik untuk memilih</div>
+            <div class="dz-sub">Format gambar (PNG atau JPG), maksimal 5 MB</div>
+          </div>
+          <div class="dz-file"><img alt="Pratinjau sidik jari"><div class="meta"><div class="name"></div><div class="size mut small"></div></div><button type="button" class="dz-clear">Ganti</button></div>
+        </div>
+      </div>
+      {% with frames=5, enroll=False %}{% include "_face_capture.html" %}{% endwith %}
+      <button type="submit" class="btn btn-block" data-loading="Memverifikasi...">Masuk</button>
+    </form>
+  </div>
+  <p class="small mut" style="text-align:center">Belum punya akun? <a href="{{ url_for('register') }}">Daftar sekarang</a></p>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/camera.js') }}" defer></script>{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Laporan{% endblock %}
+{% block content %}
+{% set total = reports|length %}
+{% set n_new = reports|selectattr('status','equalto','baru')|list|length %}
+{% set n_done = reports|selectattr('status','equalto','selesai')|list|length %}
+{% set n_proc = total - n_new - n_done %}
+<div class="page-head">
+  <div>
+    <h1>{{ 'Semua laporan masuk' if user['role']=='officer' else 'Laporan saya' }}</h1>
+    <p class="mut">{{ 'Tinjau dan tindak lanjuti laporan dari pelapor.' if user['role']=='officer' else 'Pantau status laporan yang telah Anda kirim.' }}</p>
+  </div>
+  {% if user['role']=='reporter' %}<a class="btn" href="{{ url_for('new_report') }}">{{ icon('plus', 16) }} Buat laporan</a>{% endif %}
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="n">{{ total }}</div><div class="l">Total laporan</div></div>
+  <div class="stat"><div class="n">{{ n_new }}</div><div class="l">Baru</div></div>
+  <div class="stat"><div class="n">{{ n_proc }}</div><div class="l">Dalam proses / ditolak</div></div>
+  <div class="stat"><div class="n">{{ n_done }}</div><div class="l">Selesai</div></div>
+</div>
+
+{% if reports %}
+<div class="toolbar">
+  <input type="text" id="filter-q" placeholder="Cari judul, kategori, atau pelapor..." aria-label="Cari laporan">
+  <select id="filter-status" aria-label="Filter status">
+    <option value="">Semua status</option>
+    {% for s in STATUSES %}<option value="{{ s }}">{{ s|capitalize }}</option>{% endfor %}
+  </select>
+</div>
+<p class="small mut" id="filter-count"></p>
+{% for r in reports %}
+<a class="report-item" href="{{ url_for('view_report', rid=r['id']) }}" data-status="{{ r['status'] }}" data-text="{{ (r['title_plain'] ~ ' ' ~ r['category'] ~ ' ' ~ r['owner'])|lower }}">
+  <div class="id">#{{ r['id'] }}</div>
+  <div class="body">
+    <div class="ttl">{{ r['title_plain'] }}</div>
+    <div class="row small mut">
+      <span>{{ r['category'] }}</span>
+      {% if user['role']=='officer' %}<span>&middot; oleh {{ r['owner'] }}</span>{% endif %}
+      <span>&middot; {{ r['created']|dt }}</span>
+    </div>
+  </div>
+  {% set cls = {'baru':'brand','diterima':'warn','diverifikasi':'warn','ditindaklanjuti':'warn','selesai':'ok','ditolak':'err'}[r['status']] %}
+  <span class="tag {{ cls }}"><span class="dot"></span>{{ r['status'] }}</span>
+</a>
+{% endfor %}
+<div class="card empty" id="no-match" style="display:none">Tidak ada laporan yang cocok dengan pencarian.</div>
+{% else %}
+<div class="card empty">
+  {{ icon('inbox', 48) }}
+  <h3>Belum ada laporan</h3>
+  <p>{{ 'Laporan yang dikirim pelapor akan muncul di sini.' if user['role']=='officer' else 'Mulai dengan membuat laporan pertama Anda. Identitas Anda tetap anonim.' }}</p>
+  {% if user['role']=='reporter' %}<a class="btn" href="{{ url_for('new_report') }}">Buat laporan</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

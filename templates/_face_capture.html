@@ -1,0 +1,26 @@
+{# Komponen kamera wajah. Parameter: frames (jumlah foto), enroll (True = pendaftaran) #}
+<div class="field face-capture" data-face-capture data-frames="{{ frames }}" data-min="{{ 3 if enroll else 2 }}">
+  <span class="lbl">{{ 'Daftarkan wajah' if enroll else 'Verifikasi wajah' }}</span>
+  <div class="cam" data-cam-box>
+    <video data-cam-video autoplay playsinline muted aria-label="Pratinjau kamera"></video>
+    <div class="cam-guide" aria-hidden="true"></div>
+    <div class="cam-msg" data-cam-msg>Kamera belum dinyalakan</div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button type="button" class="btn btn-ghost btn-sm" data-cam-start>Nyalakan kamera</button>
+    <button type="button" class="btn btn-sm" data-cam-shoot disabled>Ambil foto wajah</button>
+    <button type="button" class="btn btn-ghost btn-sm" data-cam-retake hidden>Ulangi</button>
+  </div>
+  <div class="thumbs" data-cam-thumbs aria-live="polite"></div>
+  <div class="hint">
+    {% if enroll %}Hadap lurus ke kamera di tempat yang terang, hanya satu orang di layar. Beberapa foto diambil otomatis; tahan posisi dan boleh sedikit menoleh.
+    {% else %}Hadap lurus ke kamera di tempat yang terang. Beberapa foto diambil otomatis.{% endif %}
+    Foto tidak disimpan, hanya ciri wajah terenkripsi.
+  </div>
+  <details class="alt">
+    <summary>Kamera tidak tersedia? Unggah foto wajah</summary>
+    <input type="file" name="face" accept="image/*" multiple data-cam-input>
+    <div class="hint">Pilih {{ 3 if enroll else 2 }} sampai {{ frames }} foto wajah yang jelas. Pengambilan lewat kamera lebih aman.</div>
+  </details>
+  <div class="err-msg" data-cam-err>Ambil foto wajah terlebih dahulu.</div>
+</div>

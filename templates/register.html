@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Daftar{% endblock %}
+{% block content %}
+<div class="auth">
+  <div class="auth-head">
+    <div class="badge-lg">{{ icon('shield-check', 30) }}</div>
+    <h1>Buat akun</h1>
+    <p class="mut">Pelapor tidak perlu memakai nama asli. Gunakan nama samaran agar identitas tetap anonim.</p>
+  </div>
+  <div class="card">
+    <form method="post" enctype="multipart/form-data" data-validate>
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <div class="field" data-required>
+        <label for="username">Nama samaran</label>
+        <input type="text" id="username" name="username" required minlength="3" maxlength="30" autocomplete="off" autofocus>
+        <div class="hint">3 sampai 30 karakter: huruf, angka, dan garis bawah.</div>
+        <div class="err-msg">Nama samaran minimal 3 karakter.</div>
+      </div>
+      <div class="field" data-required>
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" data-strength>
+          <button type="button" class="toggle" data-toggle-password="password" aria-pressed="false">Tampilkan</button>
+        </div>
+        <div class="meter"><i id="pw-bar"></i></div>
+        <div class="meter-label" id="pw-label">Minimal 8 karakter. Kombinasikan huruf besar, angka, dan simbol.</div>
+        <div class="err-msg">Password minimal 8 karakter.</div>
+      </div>
+      <div class="field">
+        <label for="role">Peran</label>
+        <select name="role" id="role">
+          <option value="reporter">Pelapor</option>
+          <option value="officer">Petugas (butuh kode undangan)</option>
+        </select>
+      </div>
+      <div class="field" id="officer-code-field">
+        <label for="officer_code">Kode undangan petugas</label>
+        <input type="text" id="officer_code" name="officer_code" autocomplete="off">
+        <div class="hint">Kode tampil di konsol saat aplikasi dijalankan.</div>
+      </div>
+      <div class="field">
+        <span class="lbl">Daftarkan sidik jari</span>
+        <div class="dz" data-required data-max-mb="5">
+          <input type="file" name="fingerprint" accept="image/*" required aria-label="Unggah gambar sidik jari">
+          <div class="dz-empty">
+            <div class="dz-title">Seret gambar sidik jari ke sini atau klik untuk memilih</div>
+            <div class="dz-sub">Gambar ini menjadi template login. Disimpan terenkripsi.</div>
+          </div>
+          <div class="dz-file"><img alt="Pratinjau sidik jari"><div class="meta"><div class="name"></div><div class="size mut small"></div></div><button type="button" class="dz-clear">Ganti</button></div>
+        </div>
+      </div>
+      {% with frames=6, enroll=True %}{% include "_face_capture.html" %}{% endwith %}
+      <button type="submit" class="btn btn-block" data-loading="Mendaftarkan...">Daftar</button>
+    </form>
+  </div>
+  <p class="small mut" style="text-align:center">Sudah punya akun? <a href="{{ url_for('login') }}">Masuk</a></p>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/camera.js') }}" defer></script>{% endblock %}

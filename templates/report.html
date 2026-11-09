@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Laporan #{{ r['id'] }}{% endblock %}
+{% block content %}
+{% set flow = ['baru','diterima','diverifikasi','ditindaklanjuti','selesai'] %}
+{% set cur = flow.index(r['status']) if r['status'] in flow else -1 %}
+<p class="small"><a href="{{ url_for('dashboard') }}">&larr; Kembali ke daftar laporan</a></p>
+
+<div class="card">
+  <div class="card-title">
+    <div>
+      <h2 style="margin-bottom:6px">#{{ r['id'] }} {{ title }}</h2>
+      <div class="row">
+        <span class="tag">{{ r['category'] }}</span>
+        <span class="tag">Pelapor: {{ owner }}</span>
+        <span class="small mut">{{ r['created']|dt }}</span>
+      </div>
+    </div>
+    {% if r['status']=='ditolak' %}<span class="tag err"><span class="dot"></span>Ditolak</span>{% endif %}
+  </div>
+  {% if r['status']!='ditolak' %}
+  <div class="progress" aria-label="Progres laporan">
+    {% for s in flow %}<div class="st {{ 'done' if loop.index0 <= cur }} {{ 'cur' if loop.index0 == cur }}">{{ s|capitalize }}</div>{% endfor %}
+  </div>
+  {% endif %}
+  {% if user['role']=='officer' %}
+  <form method="post" action="{{ url_for('set_status', rid=r['id']) }}" class="row" style="margin-top:18px" data-confirm="Ubah status laporan? Perubahan dicatat permanen di blockchain.">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label for="status" class="small mut">Ubah status</label>
+    <select name="status" id="status" style="width:auto">{% for s in STATUSES %}<option value="{{ s }}" {{ 'selected' if s==r['status'] }}>{{ s|capitalize }}</option>{% endfor %}</select>
+    <button type="submit" class="btn btn-ghost btn-sm">Simpan</button>
+    <span class="small mut">Dicatat di blockchain</span>
+  </form>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-title"><h3>Percakapan</h3><span class="small mut">{{ msgs|length }} pesan</span></div>
+  <div class="chat" id="chat" aria-live="polite">
+    {% for m in msgs %}
+    <div class="bubble-row {{ 'me' if m['username']==user['username'] else 'other' }}">
+      <div class="bubble-meta">
+        <b>{{ m['username'] }}</b>
+        <span class="tag {{ 'brand' if m['role']=='officer' }}">{{ 'Petugas' if m['role']=='officer' else 'Pelapor' }}</span>
+        {% if m['important'] %}<span class="tag warn">Penting &middot; enkripsi DB</span>{% endif %}
+        <span>{{ m['created']|dt }}</span>
+      </div>
+      <div class="bubble {{ 'imp' if m['important'] }}">{{ m['text'] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if atts %}
+<div class="card">
+  <div class="card-title"><h3>Barang bukti</h3><span class="small mut">{{ atts|length }} lampiran</span></div>
+  {% for a in atts %}
+  <div class="evidence">
+    {% if a['kind']=='image' %}
+      <img src="{{ url_for('att_preview', aid=a['id']) }}" data-zoom="{{ url_for('att_preview', aid=a['id']) }}" alt="Foto bukti" title="Klik untuk memperbesar">
+    {% endif %}
+    <div class="info">
+      <div class="row">
+        {{ icon('image' if a['kind']=='image' else 'file', 18) }}<b>{{ a['name_plain'] }}</b>
+        <span class="tag">{{ 'ChaCha20-Poly1305' if a['kind']=='file' else 'Steganografi LSB' }}</span>
+      </div>
+      <div class="small mut" style="margin-top:6px">SHA-256 (dicatat di blockchain)</div>
+      <div class="hashline"><code>{{ a['sha256'] }}</code>
+        <button type="button" class="icon-btn" style="width:30px;height:30px" data-copy="{{ a['sha256'] }}" title="Salin hash" aria-label="Salin hash">{{ icon('copy', 14) }}</button></div>
+      <div class="row" style="margin-top:8px">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('att_download', aid=a['id']) }}">{{ icon('download', 14) }} Unduh</a>
+        {% if a['kind']=='image' %}<a class="btn btn-ghost btn-sm" href="{{ url_for('att_extract', aid=a['id']) }}">{{ icon('unlock', 14) }} Ekstrak pesan tersembunyi</a>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+  <h3>Kirim pesan</h3>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="field">
+      <label for="message" class="sr-only">Pesan</label>
+      <textarea id="message" name="message" maxlength="5000" data-max="5000" data-submit-hotkey placeholder="Tulis pesan. Tekan Ctrl+Enter untuk mengirim."></textarea>
+      <div class="counter"></div>
+    </div>
+    <label class="check" style="margin-bottom:14px">
+      <input type="checkbox" name="important" value="1">
+      <div><b>Penting</b><span>Tambahkan enkripsi lapisan database.</span></div>
+    </label>
+    <div class="grid">
+      <div class="field">
+        <span class="lbl">File bukti</span>
+        <div class="dz" data-max-mb="16">
+          <input type="file" name="evidence_file" aria-label="Unggah file bukti">
+          <div class="dz-empty"><div class="dz-title">Pilih atau seret file</div></div>
+          <div class="dz-file"><div class="meta"><div class="name"></div><div class="size mut small"></div></div><button type="button" class="dz-clear">Hapus</button></div>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lbl">Foto bukti (steganografi)</span>
+        <div class="dz" data-max-mb="8">
+          <input type="file" name="evidence_image" accept="image/*" aria-label="Unggah foto bukti">
+          <div class="dz-empty"><div class="dz-title">Pilih atau seret foto</div></div>
+          <div class="dz-file"><img alt="Pratinjau foto"><div class="meta"><div class="name"></div><div class="size mut small"></div></div><button type="button" class="dz-clear">Hapus</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="secret_note">Catatan rahasia untuk foto</label>
+      <input type="text" id="secret_note" name="secret_note" maxlength="500">
+    </div>
+    <button type="submit" class="btn" data-loading="Mengirim...">Kirim</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Rantai bukti{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Rantai barang bukti</h1><p class="mut">Setiap peristiwa pada bukti dicatat sebagai blok. Mengubah satu blok merusak seluruh rantai sesudahnya.</p></div>
+</div>
+
+<div class="card chain-status {{ 'ok' if valid else 'bad' }}">
+  <div class="big">{{ icon('shield-check' if valid else 'alert', 26) }}</div>
+  <div>
+    {% if valid %}<h3 style="margin:0">Rantai VALID</h3><div class="small mut">Seluruh hash dan tautan antarblok konsisten.</div>
+    {% else %}<h3 style="margin:0">Rantai TIDAK VALID pada blok #{{ bad }}</h3><div class="small">{{ reason }}</div>{% endif %}
+    <div class="small mut" style="margin-top:4px">Proof-of-Work: hash harus diawali {{ difficulty }} angka nol heksadesimal.</div>
+  </div>
+</div>
+
+{% if blocks %}
+<div class="timeline">
+  {% for b in blocks %}
+  <div class="block {{ 'bad' if (not valid and bad is not none and b['idx']==bad) }}">
+    <div class="row spread">
+      <div class="row"><b>Blok #{{ b['idx'] }}</b><span class="tag brand">{{ b['parsed']['action'] }}</span></div>
+      <span class="small mut">{{ b['ts']|dt }}</span>
+    </div>
+    <dl>
+      <dt>Laporan</dt><dd>#{{ b['parsed']['report'] }} &middot; oleh {{ b['parsed']['actor'] }} ({{ 'petugas' if b['parsed']['role']=='officer' else 'pelapor' }})</dd>
+      {% if b['parsed']['evidence_sha256'] %}<dt>Bukti</dt><dd><code>{{ b['parsed']['evidence_sha256'] }}</code></dd>{% endif %}
+      <dt>Hash sebelumnya</dt><dd><code>{{ b['prev_hash'] }}</code></dd>
+      <dt>Hash blok</dt><dd><div class="row"><code>{{ b['hash'] }}</code>
+        <button type="button" class="icon-btn" style="width:28px;height:28px" data-copy="{{ b['hash'] }}" title="Salin hash" aria-label="Salin hash">{{ icon('copy', 13) }}</button></div></dd>
+      <dt>Nonce</dt><dd>{{ b['nonce'] }}</dd>
+    </dl>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty">{{ icon('chain', 48) }}<h3>Belum ada blok</h3><p>Blok pertama dibuat saat bukti diserahkan.</p></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Pesan tersembunyi{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('view_report', rid=a['report_id']) }}">&larr; Kembali ke laporan #{{ a['report_id'] }}</a></p>
+<div class="card">
+  <div class="card-title"><h2 style="margin:0">Pesan tersembunyi dalam gambar</h2>
+    {% if intact %}<span class="tag ok"><span class="dot"></span>UTUH</span>{% else %}<span class="tag err"><span class="dot"></span>BERUBAH</span>{% endif %}</div>
+  <div class="grid">
+    <div>
+      <img class="ev" src="{{ url_for('att_preview', aid=a['id']) }}" alt="Gambar pembawa pesan" style="max-width:100%;border-radius:10px;border:1px solid var(--line)">
+      <p class="small mut" style="margin-top:8px">{{ name }}</p>
+    </div>
+    <div>
+      <div class="table-wrap"><table class="kv">
+        <tr><th>Laporan</th><td>#{{ info['laporan'] }}</td></tr>
+        <tr><th>Catatan rahasia</th><td>{{ info['catatan'] or '(kosong)' }}</td></tr>
+        <tr><th>Waktu sisip</th><td>{{ info['waktu']|dt }}</td></tr>
+        <tr><th>Integritas</th><td>{{ 'Hash gambar cocok dengan catatan blockchain.' if intact else 'Hash gambar tidak cocok. Gambar mungkin telah diubah.' }}</td></tr>
+      </table></div>
+      <p class="small mut" style="margin-top:12px">Pesan dibaca dari bit paling tidak signifikan (LSB) tiap piksel, lalu didekripsi dengan AES-GCM dan Vigenere.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

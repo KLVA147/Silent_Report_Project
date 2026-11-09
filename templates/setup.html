@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Pengaturan awal{% endblock %}
+{% block content %}
+<div class="auth" style="max-width:560px">
+  <div class="auth-head">
+    <div class="badge-lg">{{ icon('key', 30) }}</div>
+    <h1>Pengaturan awal</h1>
+    <p class="mut">Buat dongle keamanan satu kali saja. Dongle adalah flashdisk yang menyimpan kunci enkripsi aplikasi.</p>
+  </div>
+
+  {% if orphan %}
+  <div class="card">
+    <div class="alert err" role="alert">{{ icon('alert', 18) }}<div>
+      <b>Data lama ditemukan, tetapi dongle tidak terdaftar.</b><br>
+      Membuat dongle baru akan membuat data lama tidak bisa dibuka. Pasang flashdisk dongle yang lama,
+      atau pulihkan file <code>dongle.sha256</code> ke folder data aplikasi.
+    </div></div>
+  </div>
+  {% else %}
+  <ol class="steps" aria-label="Langkah">
+    <li class="on">1. Colok flashdisk</li><li class="on">2. Pilih drive</li><li>3. Buat dongle</li>
+  </ol>
+  <div class="card">
+    {% if drives %}
+    <form method="post" data-validate>
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <span class="lbl">Pilih flashdisk yang akan dijadikan dongle</span>
+      {% if drives|length > 1 %}<div class="hint">Ada beberapa drive. Pilih dengan teliti: kunci akan ditulis ke drive yang Anda pilih.</div>{% endif %}
+      <div class="stack" style="margin:10px 0 16px">
+        {% for d in drives %}
+        <label class="check">
+          <input type="radio" name="drive" value="{{ d['path'] }}" {{ 'checked' if drives|length == 1 }}>
+          <div><b>{{ d['label'] }}</b><span class="mono">{{ d['path'] }}</span></div>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="alert" style="background:var(--warn-soft);color:var(--warn)" role="note">{{ icon('alert', 18) }}<div>
+        Simpan flashdisk ini baik-baik dan buat salinan cadangan file <code>.silentreport.key</code>.
+        Jika hilang, data terenkripsi tidak bisa dibuka lagi.</div></div>
+      <button type="submit" class="btn btn-block" data-loading="Membuat dongle...">Buat dongle di flashdisk ini</button>
+    </form>
+    {% else %}
+    <div class="empty" data-poll-reload="4000">
+      {{ icon('key', 44) }}
+      <h3>Flashdisk belum terdeteksi</h3>
+      <p>Colok flashdisk ke komputer. Halaman ini memeriksa ulang otomatis.</p>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('setup') }}">Periksa sekarang</a>
+    </div>
+    {% endif %}
+    <p class="small mut" style="margin:14px 0 0">
+      {% if show_all %}<a href="{{ url_for('setup') }}">Hanya tampilkan flashdisk</a>
+      {% else %}Flashdisk tidak muncul? <a href="{{ url_for('setup', semua=1) }}">Tampilkan semua drive</a>{% endif %}
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Terkunci{% endblock %}
+{% block content %}
+<div class="card lock" data-poll-dongle>
+  <div class="badge-lg">{{ icon('lock', 36) }}</div>
+  <h2>Aplikasi terkunci</h2>
+  <p>Pasang flashdisk dongle SilentReport untuk membuka aplikasi.</p>
+  <p class="small mut" id="dongle-status"><span class="spinner" aria-hidden="true"></span> Menunggu dongle... aplikasi terbuka otomatis begitu flashdisk terdeteksi.</p>
+  <p class="small mut">Data tetap terenkripsi dan tidak bisa dibuka tanpa dongle.</p>
+</div>
+{% endblock %}
